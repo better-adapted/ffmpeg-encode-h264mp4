@@ -73,8 +73,10 @@ namespace NSH264Encoder {
 
         libffmpeg::avcodec_register_all();
         libffmpeg::av_register_all();
+				libffmpeg::avformat_network_init();
 
-        avformat_alloc_output_context2(&m_oc, NULL, NULL, fname);
+        avformat_alloc_output_context2(&m_oc, NULL, "rtsp", fname);
+
         if (!m_oc) {
             /* if context failed check by specifying container */
             avformat_alloc_output_context2(&m_oc, NULL, "mp4", fname);
