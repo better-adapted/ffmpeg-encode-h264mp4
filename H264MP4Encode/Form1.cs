@@ -16,7 +16,9 @@ namespace H264MP4Encode
 {
     public partial class Form1 : Form
     {
-        int testnumber = 0;
+        public int testnumber = 0;
+        public String uri = @"rtsp://127.0.0.1:8554/live.sdp";
+
 
         RunFFplay FFplay = new RunFFplay();
 
@@ -27,7 +29,7 @@ namespace H264MP4Encode
 
         private void button1_Click(object sender, EventArgs e)
         {
-            FFplay.main();
+            FFplay.main(uri);
 
             Thread thread1 = new Thread(ThreadWork.DoWork);
             thread1.Start();
@@ -37,7 +39,7 @@ namespace H264MP4Encode
             int fps = 30;
             H264Encoder enc = new H264Encoder();
             //enc.SetupEncode(@"E:\TEMP\encoded.mp4", width, height, fps);
-            enc.SetupEncode(@"rtsp://127.0.0.1:8554/live.sdp", width, height, fps);
+            enc.SetupEncode(uri, width, height, fps);
             // "rtsp://127.0.0.1:8554/live.sdp";
 
             Font drawFont = new Font("Arial", 16);
@@ -111,55 +113,56 @@ namespace H264MP4Encode
 
         private void btDec_Click(object sender, EventArgs e)
         {
-            if(testnumber>0)
+            if (testnumber > 0)
             {
                 testnumber--;
             }
         }
-    }
 
-    internal class ThreadWork
-    {
-        public static void DoWork()
+        internal class ThreadWork
         {
-            for (int i = 0; i < 3; i++)
+            public static void DoWork()
             {
-                Console.WriteLine("Working thread...");
-                Thread.Sleep(100);
-            }
-        }
-    }
-
-    internal class RunFFplay
-    {
-        Process process;
-
-        public void kill()
-        {
-            process.Close();
-        }
-
-        public void main()
-        {
-            try
-            {
-                var process = new Process
+                for (int i = 0; i < 3; i++)
                 {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "ffplay.exe",
-                        Arguments = "-rtsp_flags listen -i rtsp://127.0.0.1:8554/live.sdp",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = false,
-                        CreateNoWindow = false
-                    }
-                };
-
-                process.Start();
+                    Console.WriteLine("Working thread...");
+                    Thread.Sleep(100);
+                }
             }
-            catch (Exception e)
+        }
+
+        internal class RunFFplay
+        {
+            Process process;
+
+            public void kill()
             {
-                Console.WriteLine(e.Message);
+                process.Close();
+            }
+
+            public void main(String pUri)
+            {
+                string temp_arg = "-rtsp_flags listen -i " + pUri;
+                try
+                {
+                    process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "ffplay.exe",
+                            Arguments = temp_arg,
+                            UseShellExecute = false,
+                            RedirectStandardOutput = false,
+                            CreateNoWindow = false
+                        }
+                    };
+
+                    process.Start();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
         }
     }
