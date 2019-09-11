@@ -13,40 +13,6 @@ using System.Windows.Forms;
 
 namespace H264MP4Encode
 {
-    internal class RunFFplay
-    {
-        Process process;
-
-        public void kill()
-        {
-            process.Close();
-        }
-
-        public void main()
-        {
-            try
-            {
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "ffplay.exe",
-                        Arguments = "-rtsp_flags listen -i rtsp://127.0.0.1:8554/live.sdp",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = false,
-                        CreateNoWindow = false
-                    }
-                };
-
-                process.Start();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-    }
-
     public partial class Form1 : Form
     {
         int testnumber = 0;
@@ -64,7 +30,7 @@ namespace H264MP4Encode
 
             int width = 640;
             int height = 480;
-            int fps = 30;
+            int fps = 25;
             H264Encoder enc = new H264Encoder();
             //enc.SetupEncode(@"E:\TEMP\encoded.mp4", width, height, fps);
             enc.SetupEncode(@"rtsp://127.0.0.1:8554/live.sdp", width, height, fps);
@@ -158,7 +124,7 @@ namespace H264MP4Encode
 
             enc.CloseEncode();
             //FFplay.kill();
-            MessageBox.Show("Test encode done.");
+            //MessageBox.Show("Test encode done.");
         }
 
         private void btInc_Click(object sender, EventArgs e)
@@ -171,6 +137,40 @@ namespace H264MP4Encode
             if(testnumber>0)
             {
                 testnumber--;
+            }
+        }
+    }
+
+    internal class RunFFplay
+    {
+        Process process;
+
+        public void kill()
+        {
+            process.Close();
+        }
+
+        public void main()
+        {
+            try
+            {
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "ffplay.exe",
+                        Arguments = "-rtsp_flags listen -i rtsp://127.0.0.1:8554/live.sdp",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = false,
+                        CreateNoWindow = false
+                    }
+                };
+
+                process.Start();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
     }
