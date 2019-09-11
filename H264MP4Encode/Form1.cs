@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -28,9 +29,12 @@ namespace H264MP4Encode
         {
             FFplay.main();
 
+            Thread thread1 = new Thread(ThreadWork.DoWork);
+            thread1.Start();
+
             int width = 640;
             int height = 480;
-            int fps = 25;
+            int fps = 30;
             H264Encoder enc = new H264Encoder();
             //enc.SetupEncode(@"E:\TEMP\encoded.mp4", width, height, fps);
             enc.SetupEncode(@"rtsp://127.0.0.1:8554/live.sdp", width, height, fps);
@@ -50,77 +54,50 @@ namespace H264MP4Encode
             Brush[] brushList = new Brush[] { Brushes.Green, Brushes.Red, Brushes.Yellow, Brushes.Pink, Brushes.LimeGreen };
             Random rnd = new Random();
 
-            for (int i = 0; i < 100; i++)
+
+            for (int j = 0; j < 100; j++)
             {
-                int rndTmp = rnd.Next(1, 3);
-                g.FillRectangle(brushList[i % 5], (i % width) * 2, (i % height) * 0.5f, i % 30, i % 30);
-                g.FillRectangle(brushList[i % 5], (i % width) * 2, (i % height) * 2, i % 30, i % 30);
-                g.FillRectangle(brushList[i % 5], (i % width) * 0.5f, (i % height) * 2, i % 30, i % 30);
+                for (int i = 0; i < 100; i++)
+                {
+                    int rndTmp = rnd.Next(1, 3);
 
-                drawString = String.Format("i:{0},T:{1}", i, testnumber);
-                g.FillRectangle(Brushes.Black, font_x, font_y, width, height);
-                g.DrawString(drawString, drawFont, drawBrush, font_x, font_y, drawFormat);
+                    g.FillRectangle(brushList[i % 5], (i % width) * 2, (i % height) * 0.5f, i % 30, i % 30);
+                    g.FillRectangle(brushList[i % 5], (i % width) * 2, (i % height) * 2, i % 30, i % 30);
+                    g.FillRectangle(brushList[i % 5], (i % width) * 0.5f, (i % height) * 2, i % 30, i % 30);
 
-                g.Save();
+                    drawString = String.Format("i:{0},T:{1}", i, testnumber);
+                    g.FillRectangle(Brushes.Black, font_x, font_y, width, height);
+                    g.DrawString(drawString, drawFont, drawBrush, font_x, font_y, drawFormat);
 
-                Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
-                BitmapData bmpData = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    g.Save();
 
-                // Get the address of the first line.
-                IntPtr ptr = bmpData.Scan0;
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+                    BitmapData bmpData = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
 
-                // Declare an array to hold the bytes of the bitmap.
-                int bytes = Math.Abs(bmpData.Stride) * image.Height;
-                byte[] rgbValues = new byte[bytes];
+                    // Get the address of the first line.
+                    IntPtr ptr = bmpData.Scan0;
 
-                // Copy the RGB values into the array.
-                System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
+                    // Declare an array to hold the bytes of the bitmap.
+                    int bytes = Math.Abs(bmpData.Stride) * image.Height;
+                    byte[] rgbValues = new byte[bytes];
 
-                enc.WriteFrame(rgbValues);
-                testnumber++;
+                    // Copy the RGB values into the array.
+                    System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
 
-                System.Threading.Thread.Sleep(10);
+                    enc.WriteFrame(rgbValues);
+                    testnumber++;
 
-                // Unlock the bits.
-                image.UnlockBits(bmpData);
+                    System.Threading.Thread.Sleep(10);
+
+                    // Unlock the bits.
+                    image.UnlockBits(bmpData);
+                }
+
+                g.FillRectangle(Brushes.Black, 0, 0, width, height);
             }
+
 
             g.FillRectangle(Brushes.White, 0, 0, width, height);
-
-            for (int i = 0; i < 100; i++)
-            {
-                int rndTmp = rnd.Next(1, 3);
-                g.FillRectangle(brushList[i % 5], (i % width) * 2, (i % height) * 0.5f, i % 30, i % 30);
-                g.FillRectangle(brushList[i % 5], (i % width) * 2, (i % height) * 2, i % 30, i % 30);
-                g.FillRectangle(brushList[i % 5], (i % width) * 0.5f, (i % height) * 2, i % 30, i % 30);
-
-                drawString = String.Format("i:{0},T:{1}", i, testnumber);
-                g.FillRectangle(Brushes.Black, font_x, font_y, width, height);
-                g.DrawString(drawString, drawFont, drawBrush, font_x, font_y, drawFormat);
-
-                g.Save();
-
-                Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
-                BitmapData bmpData = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-
-                // Get the address of the first line.
-                IntPtr ptr = bmpData.Scan0;
-
-                // Declare an array to hold the bytes of the bitmap.
-                int bytes = Math.Abs(bmpData.Stride) * image.Height;
-                byte[] rgbValues = new byte[bytes];
-
-                // Copy the RGB values into the array.
-                System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
-
-                enc.WriteFrame(rgbValues);
-                testnumber++;
-
-                //System.Threading.Thread.Sleep(10);
-
-                // Unlock the bits.
-                image.UnlockBits(bmpData);
-            }
 
             enc.CloseEncode();
             //FFplay.kill();
@@ -137,6 +114,18 @@ namespace H264MP4Encode
             if(testnumber>0)
             {
                 testnumber--;
+            }
+        }
+    }
+
+    internal class ThreadWork
+    {
+        public static void DoWork()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Console.WriteLine("Working thread...");
+                Thread.Sleep(100);
             }
         }
     }
