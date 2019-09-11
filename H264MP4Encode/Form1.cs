@@ -17,9 +17,8 @@ namespace H264MP4Encode
     public partial class Form1 : Form
     {
         public int testnumber = 0;
-        public String uri = @"rtsp://127.0.0.1:8554/live.sdp";
-        //public String uri = @"rtmp:///live/myStream.sdp";
-
+        public String uri_source = @"rtp://127.0.0.1:8554/live.sdp";
+        public String uri_player = @"rtsp://127.0.0.1:8554/live.sdp";
 
         RunFFplay FFplay = new RunFFplay();
 
@@ -27,13 +26,13 @@ namespace H264MP4Encode
         {
             InitializeComponent();
 
-            FFplay.main(uri);
+            FFplay.main(uri_player);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             Thread thread1 = new Thread(new ParameterizedThreadStart(ThreadWork.DoWork));
-            thread1.Start(uri);
+            thread1.Start(uri_source);
         }
 
         private void btInc_Click(object sender, EventArgs e)
